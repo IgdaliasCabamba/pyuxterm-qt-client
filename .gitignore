@@ -1,0 +1,8 @@
+qtenv/
+tests/
+**/bin
+**/build
+**/dist
+**/__pycache__
+*.pyi
+*.pyc
