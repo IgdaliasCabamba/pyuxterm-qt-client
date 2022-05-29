@@ -1,4 +1,12 @@
 import sys
+import faulthandler
+import sys
+
+from qtmd.splitter import MultiSplitter
+
+sys.dont_write_bytecode = True
+faulthandler.enable()
+
 import os
 
 if getattr(sys, "frozen", False):
@@ -70,15 +78,31 @@ class MainWindow(QMainWindow):
         self.layout.setContentsMargins(0,0,0,0)
         
         self.main_widget = QWidget(self)
-
         self.status_bar = QStatusBar(self)
+        self.add_term_button = QPushButton("A")
+        self.rem_term_button = QPushButton("R")
 
-        self.emulator = TerminalWidget(None, "bash")
+        self.div = MultiSplitter(self)
+
+        self.emulator = TerminalWidget(self.div, "bash")
         self.emulator.spawn(self.PORT)
-        self.layout.addWidget(self.emulator)
-
-        self.main_widget.setLayout(self.layout)
         
+        #self.emulator2 = TerminalWidget(self.div, "python")
+        #self.emulator2.spawn(self.PORT+2)
+
+        #self.emulator3 = TerminalWidget(self.div, "node")
+        #self.emulator3.spawn(self.PORT+44)
+        
+        #self.emulator4 = TerminalWidget(self.div, "sh")
+        #self.emulator4.spawn(self.PORT+4)
+
+        self.div.splitAt(None, 1, self.emulator)
+        #self.div.splitAt(self.emulator, 3, self.emulator2)
+        #self.div.splitAt(self.emulator2, 1, self.emulator3)
+        #self.div.splitAt(self.emulator, 2, self.emulator4)
+
+        self.layout.addWidget(self.div)
+        self.main_widget.setLayout(self.layout)
         self.setCentralWidget(self.main_widget)
         self.setStatusBar(self.status_bar)
 
@@ -106,7 +130,13 @@ app.setApplicationName("UTERM")
 window = MainWindow(None)
 
 qtmodern.styles.dark(app)
-mw = qtmodern.windows.ModernWindow(window)
+mw = qtmodern.windows.ModernWindow(
+    window,
+    extra_buttons_left=[
+        window.add_term_button,
+        window.rem_term_button
+        ]
+    )
 window.emulator.set_win(mw)
 mw.show()
 
