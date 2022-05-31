@@ -1,3 +1,5 @@
+# Based on amazing work of @hydrargyrum at https://github.com/hydrargyrum/eye/blob/master/eye/widgets/splitter.py
+
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -55,38 +57,48 @@ class MultiSplitter(QFrame, CategoryMixin):
 
     def __init__(self, parent):
         super().__init__(parent)
+        self.setObjectName("qtmd-splitter")
+        self.add_category("splitmanager")
+        
         self.main = parent
         self.containers = []
         self.index = 0
+        self.opaque_resize = False
 
         self.root = self.SplitterClass(orientation=Qt.Orientation.Horizontal)
 
         layout = QStackedLayout(self)
         self.setLayout(layout)
         layout.addWidget(self.root)
+    
+    def get_data_of(self, reference_widget):
+        if reference_widget is None:
+            parent = self.root
+            idx = 0
+        else:
+            assert self.isAncestorOf(reference_widget)
 
-        self.add_category("splitmanager")
+            if hasattr(reference_widget.parent, "root"):
+                parent = reference_widget.parent.root
+            else:
+                parent = reference_widget.parent()
+
+            idx = parent.indexOf(reference_widget)
+        
+        return {"idx":idx, "parent":parent}
 
     def add_widget(self, widget:QWidget) -> None:
         self.containers.append(widget)
 
-    def splitAt(self, current_widget, direction, new_widget) -> None:
-        if current_widget is None:
-            parent = self.root
-            idx = 0
-        else:
-            assert self.isAncestorOf(current_widget)
-
-            if hasattr(current_widget.parent, "root"):
-                parent = current_widget.parent.root
-            else:
-                parent = current_widget.parent()
-
-            idx = parent.indexOf(current_widget)
+    def splitAt(self, reference_widget, direction, new_widget) -> None:
+        widget_data = self.get_data_of(reference_widget)
+        parent = widget_data["parent"]
+        idx = widget_data["idx"]
 
         orientation = consts.ORIENTATIONS[direction]
         if parent.orientation() == orientation:
             oldsize = parent.sizes()
+           
             if oldsize:
                 oldsize[idx] //= 2
                 oldsize.insert(idx, oldsize[idx])
@@ -94,41 +106,43 @@ class MultiSplitter(QFrame, CategoryMixin):
             if direction in (consts.DOWN, consts.RIGHT):
                 idx += 1
 
-            parent.insertWidget(idx, new_widget)
+            parent.insertWidget(idx, new_widget) # insert the new widget to the parent of reference widget
 
             if oldsize:
                 parent.setSizes(oldsize)
         else:
-            refocus = current_widget and current_widget.hasFocus()
-
+            refocus = reference_widget and reference_widget.hasFocus()
             new_split = self.SplitterClass(orientation=orientation)
 
-            if current_widget:
+            if reference_widget:
                 oldsize = parent.sizes()
+                
                 if direction in (consts.DOWN, consts.RIGHT):
-                    new_split.addWidget(current_widget)
-                    parent.insertWidget(idx, new_split)
+                    new_split.addWidget(reference_widget)
+                    parent.insertWidget(idx, new_split) # insert the new splitter to the parent of reference widget
                     new_split.addWidget(new_widget)
 
                 else:
                     new_split.addWidget(new_widget)
-                    parent.insertWidget(idx, new_split)
-                    new_split.addWidget(current_widget)
+                    parent.insertWidget(idx, new_split) # insert the new splitter to the parent of reference widget
+                    new_split.addWidget(reference_widget)
 
                 parent.setSizes(oldsize)
                 new_split.setSizes([100, 100])
-                current_widget.setParent(new_split)
+                reference_widget.setParent(new_split)
 
             else:
                 new_split.addWidget(new_widget)
                 parent.insertWidget(idx, new_split)
 
             if refocus:
-                current_widget.setFocus()
+                reference_widget.setFocus()
 
         self.index += 1
-        self.add_splited_widget(self.index, current_widget, direction, new_widget)
+        
+        self.add_splited_widget(self.index, reference_widget, direction, new_widget)
         self.update_size()
+        self._apply_properties()
 
     def add_splited_widget(self, id, ref, direction, new_widget):
         ref_id = None
@@ -153,7 +167,30 @@ class MultiSplitter(QFrame, CategoryMixin):
             x.append(2)
 
         self.root.setSizes(x)
+    
+    def _iter_recursive(self, startAt=None):
+        if startAt is None:
+            startAt = self.root
+
+        splitters = [startAt]
+        yield startAt
+        while splitters:
+            spl = splitters.pop()
+            for i in range(spl.count()):
+                w = spl.widget(i)
+                if isinstance(w, self.SplitterClass):
+                    splitters.append(w)
+                yield w
 
     @property
     def has_widget(self) -> bool:
         return bool(len(self.containers))
+    
+    def _apply_properties(self):
+        self.set_opaque_resize(self.opaque_resize)
+    
+    def set_opaque_resize(self, opaque:bool = True):
+        self.opaque_resize = opaque
+        for w in self._iter_recursive():
+            if hasattr(w, "setOpaqueResize"):
+                w.setOpaqueResize(opaque)

@@ -1,0 +1,46 @@
+QSizeGrip {
+    image: none;
+    width: 16px;
+    height: 16px;
+}
+Splitter::handle {
+    image: none;
+}
+Splitter::handle:horizontal {
+    width: .5px;
+}
+Splitter::handle:vertical {
+    height: .5px;
+}
+Splitter::handle:pressed {
+    image:none
+}   
+
+QGithubButton:hover {
+    background-color: rgba(180, 180, 180, 40);
+    border-radius:4px;
+}
+#TermButton::menu-indicator,
+#TermButton::menu-indicator {
+    image: none;
+    width:0;
+    height:0
+}
+#TermButton, #TermNavItem {
+    padding:1px 3px;
+    background-color: transparent;
+    border:none;
+}
+#TermNavItem {
+    margin:0 5px;
+    margin-top:2px;
+}
+#TermNavItem:hover,
+#TermButton:hover,
+#TermButton:hover {
+    background-color: rgba(180, 180, 180, 70);
+    border-radius:4px;
+}
+#TermButton[min=true], #TermNavItem[min=true] {
+    padding:0
+}
