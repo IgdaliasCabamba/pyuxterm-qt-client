@@ -1,13 +1,14 @@
 import os
 import subprocess
-from PyQt5.QtCore import *
-from PyQt5.QtWebEngineCore import *
-from PyQt5.QtWebEngineWidgets import *
-from PyQt5.QtWebChannel import *
+from PySide6.QtCore import *
+from PySide6.QtWebEngineCore import *
+from PySide6.QtWebEngineWidgets import *
+from PySide6.QtWebChannel import *
+
 
 class TerminalWidget(QWebEngineView):
     
-    on_hand_event = pyqtSignal(object)
+    on_hand_event = Signal(object)
 
     def __init__(self, parent, command, theme="default", font_name="Monospace"):
         super().__init__(parent)

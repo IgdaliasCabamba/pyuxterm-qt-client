@@ -1,9 +1,7 @@
-from PyQt5.QtCore import Qt
+from qtpy.QtCore import Qt
 
-class CategoryMixin(object):
-    def __init__(self, **kwargs):
-        super(CategoryMixin, self).__init__(**kwargs)
-        self._categories = set()
+class CategoryMixin:
+    _categories = set()
 
     def categories(self):
         return self._categories

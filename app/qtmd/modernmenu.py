@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QFrame, QGraphicsDropShadowEffect, QVBoxLayout, QSizePolicy, QLabel, QHBoxLayout, QShortcut
-from PyQt5.QtGui import QColor
-from PyQt5.QtCore import pyqtSignal, QPoint
+from qtpy.QtWidgets import QFrame, QGraphicsDropShadowEffect, QVBoxLayout, QSizePolicy, QLabel, QHBoxLayout, QShortcut
+from qtpy.QtGui import QColor
+from qtpy.QtCore import Signal, QPoint
 
 class ModernMenuSeparator(QFrame):
     def __init__(self, parent):
@@ -13,7 +13,7 @@ class ModernMenuSeparator(QFrame):
 
 class ModernAction(QFrame):
     
-    on_triggered = pyqtSignal()
+    on_triggered = Signal()
 
     def __init__(self, parent=None, title:str="", shortcut:str=""):
         super().__init__(parent)

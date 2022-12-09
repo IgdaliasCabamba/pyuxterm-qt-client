@@ -1,8 +1,8 @@
 # Based on amazing work of @hydrargyrum at https://github.com/hydrargyrum/eye/blob/master/eye/widgets/splitter.py
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from qtpy.QtCore import *
+from qtpy.QtGui import *
+from qtpy.QtWidgets import *
 
 from . import CategoryMixin
 from . import consts
@@ -53,7 +53,7 @@ class Splitter(QSplitter):
 class MultiSplitter(QFrame, CategoryMixin):
 
     SplitterClass = Splitter
-    on_last_widget_closed = pyqtSignal()
+    on_last_widget_closed = Signal()
 
     def __init__(self, parent):
         super().__init__(parent)

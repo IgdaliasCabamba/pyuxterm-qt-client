@@ -5,15 +5,19 @@ sys.dont_write_bytecode = True
 faulthandler.enable()
 
 import os
+
+os.environ["QT_API"] = "pyside6"
+os.environ["QT_QPA_PLATFORM"] = "xcb"  # Wayland scale issue
+
 import random
 from weakref import ref
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWebChannel import *
-from PyQt5.QtWebEngineCore import *
-from PyQt5.QtWebEngineWidgets import *
-from PyQt5.QtWidgets import *
+from PySide6.QtCore import *
+from PySide6.QtGui import *
+from PySide6.QtWebChannel import *
+from PySide6.QtWebEngineCore import *
+from PySide6.QtWebEngineWidgets import *
+from PySide6.QtWidgets import *
 
 import qtmodern.styles
 import qtmodern.windows
@@ -111,7 +115,7 @@ class MainWindow(QMainWindow):
         self.resize(1000, 600)
 
         qtRectangle = self.frameGeometry()
-        centerPoint = QDesktopWidget().availableGeometry().center()
+        centerPoint = QGuiApplication.primaryScreen().availableGeometry().center()
         qtRectangle.moveCenter(centerPoint)
         self.move(qtRectangle.topLeft())
         self.initial_opening()

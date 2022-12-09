@@ -1,7 +1,7 @@
 from functools import partial
 import hjson
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
+from PySide6.QtWidgets import *
+from qtpy.QtGui import *
 
 class TermBinsMenu(QMenu):
     def __init__(self, parent):

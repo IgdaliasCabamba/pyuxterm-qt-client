@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QFrame, QSizePolicy, QHBoxLayout, QVBoxLayout
+from qtpy.QtWidgets import QFrame, QSizePolicy, QHBoxLayout, QVBoxLayout
 
 class QGithubButton(QFrame):
     def __init__(self, parent, orientation=0):
