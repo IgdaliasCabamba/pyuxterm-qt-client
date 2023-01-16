@@ -28,6 +28,41 @@ class TermBinsMenu(QMenu):
             self.addAction(action)
             group_mode.addAction(action)
 
+class TermSplitMenu(QMenu):
+    SPLIT_MAP = {
+        "up":{
+            "orientation":0,
+            "text": "Split Up"
+            },
+        "down":{
+            "orientation":1,
+            "text": "Split Down"
+            },
+        "left":{
+            "orientation":2,
+            "text": "Split Left"
+            },
+        "right":{
+            "orientation":3,
+            "text": "Split Right"
+            },
+    }
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.build()
+
+    def build(self):
+        self.setTitle("Split")
+        self.setToolTip("Split New Terminal")
+
+        for key, split_option in self.SPLIT_MAP.items():
+            action = QAction(split_option["text"], self)
+            orientation = split_option["orientation"]
+
+            action.triggered.connect(partial(self.parent().split_new_terminal, orientation))
+            self.addAction(action)
+
+
 class TerminalsJsonApi:
     def __init__(self, file):
         with open(file, "r") as fp:

@@ -1,13 +1,13 @@
-#windowFrame {
+/*#windowFrame {
   border-radius: 5px 5px 5px 5px;
   background-color: palette(Window);
-}
+}*/
 
 #titleBar {
-  border: 0px none palette(base);
+  /*border: 0px none palette(base);
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
-  background-color: palette(Window);
+  background-color: palette(Window);*/
   max-height: 24px;
 }
 
