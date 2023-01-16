@@ -1,53 +1,21 @@
-from utils import *
-from terminal_widget import *
+import os
+from src import *
 from qtmd.splitter import MultiSplitter
 from qtmd.qgithubbutton import QGithubButton
-import qtmodern.windows
-import qtmodern.styles
 from PySide6.QtWidgets import *
 from PySide6.QtWebEngineWidgets import *
 from PySide6.QtWebEngineCore import *
 from PySide6.QtWebChannel import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
-from weakref import ref
-import random
-import os
-import faulthandler
-import sys
-
-sys.dont_write_bytecode = True
-faulthandler.enable()
-
-
-os.environ["QT_API"] = "pyside6"
-os.environ["QT_QPA_PLATFORM"] = "xcb"  # Wayland scale issue
-
-
-if getattr(sys, "frozen", False):
-    if hasattr(sys, "_MEIPASS"):
-        ROOT_PATH = sys._MEIPASS
-    else:
-        ROOT_PATH = os.path.dirname(os.path.realpath(sys.executable))
-else:
-    ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
-
-os.environ["QtxTermRootPath"] = ROOT_PATH
-
-with open(os.path.join(ROOT_PATH, "resources", "style.qss"), "r") as fp:
-    STYLE_SHEET = fp.read()
-
-with open(os.path.join(ROOT_PATH, "settings.json"), "r") as fp:
-    QTXTERM_SETTINGS = hjson.load(fp)
 
 
 class MainWindow(QMainWindow):
 
-    def __init__(self, parent=None, qapp=None):
+    def __init__(self, parent=None, qapp=None, emulators_file=None, port_creator=None):
         super().__init__(parent)
         self.terminals = {}
-        self.terminals_json_api = TerminalsJsonApi(
-            os.path.join(ROOT_PATH, "terminals.json"))
+        self.terminals_json_api = TerminalsJsonApi(emulators_file)
         self.current_terminal_emulator = self.terminals_json_api.current
         self.index = 0
         self.modern_window = None
@@ -55,75 +23,71 @@ class MainWindow(QMainWindow):
         self.split_menu = TermSplitMenu(self)
         self._current_terminal_view = None
         self.qapp = qapp
-        self.qapp.focusChanged.connect(self._app_focus_changed)
-        self.qapp.lastWindowClosed.connect(self.kill_app)
+        self.PORT = port_creator
+        (self.build()
+            .listen_events()
+            .after_startup())
 
-        self.PORT = lambda: random.randint(7000, 65530)
+    def build(self) -> "MainWindow":
 
         self.layout = QVBoxLayout()
         self.layout.setContentsMargins(2, 0, 2, 0)
 
         self.main_widget = QWidget(self)
-        self.status_bar = QStatusBar(self)
+        self.status_bar = StatusBar(self)
 
-        self.add_term_button = QPushButton()
-        self.add_term_button.clicked.connect(self.add_terminal)
-        self.add_term_button.setObjectName("TermButton")
-        self.add_term_button.setIcon(QIcon(
-            os.path.join(ROOT_PATH, "resources", "icons",
+        self.create_new_terminal_button = QPushButton()
+        self.create_new_terminal_button.setObjectName("TermButton")
+        self.create_new_terminal_button.setIcon(QIcon(
+            os.path.join(os.environ["QtxTermRootPath"], "resources", "icons",
                          "icons8-plus-math-48.png")
         ))
 
-        self.term_picker = QToolButton(self)
-        self.term_picker.setMenu(self.terminal_menu)
-        self.term_picker.setObjectName("TermButton")
-        self.term_picker.setProperty("min", True)
-        self.term_picker.setIcon(QIcon(
-            os.path.join(ROOT_PATH, "resources", "icons",
+        self.terminal_emulator_menu_button = QToolButton(self)
+        self.terminal_emulator_menu_button.setMenu(self.terminal_menu)
+        self.terminal_emulator_menu_button.setObjectName("TermButton")
+        self.terminal_emulator_menu_button.setProperty("min", True)
+        self.terminal_emulator_menu_button.setIcon(QIcon(
+            os.path.join(os.environ["QtxTermRootPath"], "resources", "icons",
                          "icons8-expand-arrow-16.png")
         ))
-        self.term_picker.clicked.connect(lambda: self.term_picker.showMenu())
-        self.term_picker.setMaximumSize(16, 16)
+        self.terminal_emulator_menu_button.setMaximumSize(16, 16)
 
-        self.splitter_options = QPushButton()
-        self.splitter_options.setMenu(self.split_menu)
-        self.splitter_options.setObjectName("TermButton")
-        self.splitter_options.setIcon(QIcon(
-            os.path.join(ROOT_PATH, "resources", "icons",
+        self.show_split_new_terminal_menu = QPushButton()
+        self.show_split_new_terminal_menu.setMenu(self.split_menu)
+        self.show_split_new_terminal_menu.setObjectName("TermButton")
+        self.show_split_new_terminal_menu.setIcon(QIcon(
+            os.path.join(os.environ["QtxTermRootPath"], "resources", "icons",
                          "icons8-columns-48.png")
         ))
-        self.splitter_options.clicked.connect(
-            lambda: self.splitter_options.showMenu())
 
-        self.rem_term_button = QPushButton()
-        self.rem_term_button.clicked.connect(self.kill_term)
-        self.rem_term_button.setIcon(QIcon(
-            os.path.join(ROOT_PATH, "resources",
+        self.remove_current_terminal_button = QPushButton()
+        self.remove_current_terminal_button.setIcon(QIcon(
+            os.path.join(os.environ["QtxTermRootPath"], "resources",
                          "icons", "icons8-trash-48.png")
         ))
-        self.rem_term_button.setObjectName("TermNavItem")
+        self.remove_current_terminal_button.setObjectName("TermNavItem")
 
-        self.term_ghbtn = QGithubButton(self)
-        self.term_ghbtn.setObjectName("TermNavItem")
-        self.term_ghbtn.setProperty("min", True)
-        self.term_ghbtn.set_widget_primary(self.add_term_button)
-        self.term_ghbtn.set_widget_secondary(self.term_picker)
+        self.new_terminal_buttons = QGithubButton(self)
+        self.new_terminal_buttons.setObjectName("TermNavItem")
+        self.new_terminal_buttons.setProperty("min", True)
+        self.new_terminal_buttons.set_widget_primary(
+            self.create_new_terminal_button)
+        self.new_terminal_buttons.set_widget_secondary(
+            self.terminal_emulator_menu_button)
 
-        self.cfg_term_button = QPushButton()
-        self.cfg_term_button.clicked.connect(self.open_settings)
-        self.cfg_term_button.setIcon(QIcon(
-            os.path.join(ROOT_PATH, "resources", "icons",
+        self.open_settings_file_button = QPushButton()
+        self.open_settings_file_button.setIcon(QIcon(
+            os.path.join(os.environ["QtxTermRootPath"], "resources", "icons",
                          "icons8-settings-48.png")
         ))
-        self.cfg_term_button.setObjectName("TermNavItem")
+        self.open_settings_file_button.setObjectName("TermNavItem")
 
         self.div = MultiSplitter(self)
         self.div.setObjectName("Splitter")
         self.div.set_opaque_resize(True)
 
         self.layout.addWidget(self.div)
-        #self.status_bar.addWidget(QLabel(str(os.getcwd())))
-        self.status_bar.addPermanentWidget(QLabel("CPU: 100%"))
         self.main_widget.setLayout(self.layout)
         self.setCentralWidget(self.main_widget)
         self.setStatusBar(self.status_bar)
@@ -134,10 +98,23 @@ class MainWindow(QMainWindow):
         centerPoint = QGuiApplication.primaryScreen().availableGeometry().center()
         qtRectangle.moveCenter(centerPoint)
         self.move(qtRectangle.topLeft())
-        self.initial_opening()
+        return self
 
-    def initial_opening(self):
+    def listen_events(self) -> "MainWindow":
+        self.create_new_terminal_button.clicked.connect(self.add_terminal)
+        self.terminal_emulator_menu_button.clicked.connect(
+            lambda: self.terminal_emulator_menu_button.showMenu())
+        self.show_split_new_terminal_menu.clicked.connect(
+            lambda: self.show_split_new_terminal_menu.showMenu())
+        self.remove_current_terminal_button.clicked.connect(self.kill_term)
+        self.open_settings_file_button.clicked.connect(self.open_settings)
+        self.qapp.focusChanged.connect(self._app_focus_changed)
+        self.qapp.lastWindowClosed.connect(self.kill_app)
+        return self
+
+    def after_startup(self) -> "MainWindow":
         self._new_terminal(self.current_terminal_emulator["bin"], None, 0)
+        return self
 
     def split_new_terminal(self, orientation: int) -> None:
         self._new_terminal(
@@ -146,7 +123,7 @@ class MainWindow(QMainWindow):
     def add_terminal(self) -> None:
         self._new_terminal(self.current_terminal_emulator["bin"], None, 0)
 
-    def _new_terminal(self, command, widget_ref, orientation):
+    def _new_terminal(self, command, widget_ref, orientation) -> None:
         self.terminals[self.index] = ((
             TerminalWidget(self.div, command)
             .spawn(self.PORT())
@@ -168,10 +145,10 @@ class MainWindow(QMainWindow):
 
         self.index += 1
 
-    def select_terminal(self, term_data: dict):
+    def select_terminal(self, term_data: dict) -> None:
         self.current_terminal_emulator = term_data
 
-    def kill_term(self):
+    def kill_term(self) -> None:
         for idx, term in self.terminals.items():
             if term == self._current_terminal_view:
                 self.terminals.pop(idx)
@@ -196,45 +173,17 @@ class MainWindow(QMainWindow):
         for term in self.terminals.values():
             term.set_window_api(modern_window)
 
-    def _app_focus_changed(self, _, new):
+    def _app_focus_changed(self, _, new) -> None:
         if isinstance(new, TerminalWidget) and new in self.terminals.values():
             self._current_terminal_view = new
 
-    def set_current_terminal_view(self, terminal_view: TerminalWidget):
+    def set_current_terminal_view(self, terminal_view: TerminalWidget) -> None:
         self._current_terminal_view = terminal_view
 
-    def open_settings(self):
+    def open_settings(self) -> None:
         editor = os.getenv('EDITOR')
-        filename = os.path.join(ROOT_PATH, "settings.json")
+        filename = os.path.join(os.environ["QtxTermRootPath"], "data", "settings.json")
         if editor:
             subprocess.Popen([editor, filename])
         else:
             subprocess.Popen(["xdg-open", filename])
-
-
-app = QApplication(sys.argv)
-app.setApplicationName("UTERM")
-
-window = MainWindow(None, app)
-
-if QTXTERM_SETTINGS["app-theme"] == "light":
-    qtmodern.styles.light(app)
-else:
-    qtmodern.styles.dark(app)
-
-mw = qtmodern.windows.ModernWindow(
-    window,
-    extra_buttons_left=[
-        window.term_ghbtn,
-        window.splitter_options,
-        window.rem_term_button,
-        window.cfg_term_button
-    ]
-)
-window.set_modern_window(mw)
-mw.show()
-
-app.setStyleSheet(STYLE_SHEET)
-window.setStyleSheet(STYLE_SHEET)
-
-app.exec()
