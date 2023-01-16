@@ -178,7 +178,7 @@ class MainWindow(QMainWindow):
                 term.close()
                 term.deleteLater()
                 terminals = self.terminals.values()
-                if terminals:
+                if len(terminals) > 0:
                     self._current_terminal_view = terminals[0]
                 else:
                     self._current_terminal_view = None
