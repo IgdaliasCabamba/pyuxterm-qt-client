@@ -27,7 +27,7 @@
 			"name":"Kali",
 			"bin":"/bin/bash",
 			"run":["distrobox-enter --root hack\\n"],
-			"icon":null,
+			"icon":"kali-linux.png",
 			"run_on_startup":false,
 			"id":3
 		}

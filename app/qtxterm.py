@@ -114,7 +114,7 @@ class MainWindow(QMainWindow):
         self.qapp.focusChanged.connect(self._app_focus_changed)
         self.qapp.lastWindowClosed.connect(self.kill_app)
 
-        self.home_screen.btn_new_local_terminal.clicked.connect(
+        self.home_screen.btn_new_terminal.clicked.connect(
             self.add_terminal)
         return self
 

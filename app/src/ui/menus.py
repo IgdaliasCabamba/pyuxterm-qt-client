@@ -1,6 +1,7 @@
 from functools import partial
 from PySide6.QtWidgets import *
 from qtpy.QtGui import *
+import os
 
 
 class TermBinsMenu(QMenu):
@@ -23,6 +24,11 @@ class TermBinsMenu(QMenu):
 
             if terminal["id"] == current_terminal["id"]:
                 action.setChecked(True)
+
+            if isinstance(terminal["icon"], str):
+                icon_name = terminal["icon"]
+                action.setIcon(QIcon(os.path.join(
+                    os.environ["QtxTermRootPath"], "resources", "icons", "emulators", icon_name)))
 
             action.triggered.connect(
                 partial(self.parent().select_terminal, terminal))

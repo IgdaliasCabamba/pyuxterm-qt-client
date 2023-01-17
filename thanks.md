@@ -7,3 +7,5 @@
 <a href="https://www.freepik.com/free-photo/minimal-globe-technology-business-background_15474113.htm#query=space&position=43&from_view=search&track=sph">Image by rawpixel.com</a> on Freepik
 
 <a href="https://www.freepik.com/free-photo/aesthetic-dark-wallpaper-background-neon-light_17581562.htm#query=space&position=2&from_view=search&track=sph">Image by rawpixel.com</a> on Freepik
+
+<a target="_blank" href="https://icons8.com/icon/101665/kali-linux">Kali Linux</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>

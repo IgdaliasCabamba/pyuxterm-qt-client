@@ -2,7 +2,6 @@ import psutil
 from PySide6.QtWidgets import QStatusBar, QLabel
 from PySide6.QtCore import Qt, QObject, QThread, Signal, QTimer
 from ..thread_manager import ChellyQThreadManager
-import time
 
 
 class SystemMonitor(QObject):
@@ -14,19 +13,19 @@ class SystemMonitor(QObject):
         self.parent = parent
 
     def run(self) -> None:
-        self.update_stats()
+        self.parent.on_refresh_stats.connect(self.update_stats)
 
     def update_stats(self) -> None:
-        while True:
-            data = {"cpu": psutil.cpu_percent(interval=1, percpu=True),
-                    "mem": psutil.virtual_memory()}
+        data = {"cpu": psutil.cpu_percent(interval=1, percpu=True),
+                "mem": psutil.virtual_memory()}
 
-            self.on_updated.emit(data)
+        self.on_updated.emit(data)
         
-            time.sleep(1)
 
 
 class StatusBar(QStatusBar):
+    on_refresh_stats = Signal()
+
     COLORS = {
         "good": "#51c48f",
         "warning": "#e8c55a",
@@ -43,6 +42,10 @@ class StatusBar(QStatusBar):
         self.monitor_worker.on_updated.connect(self.display_stats)
         self.thread.started.connect(self.monitor_worker.run)
         self.thread.start()
+        self.stats_update_timer = QTimer(self)
+        self.stats_update_timer.setInterval(1000)
+        self.stats_update_timer.timeout.connect(lambda: self.on_refresh_stats.emit())
+        self.stats_update_timer.start()
         self.build()
 
     def build(self):
