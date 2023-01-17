@@ -7,6 +7,7 @@ faulthandler.enable()
 import qtmodern.windows
 import qtmodern.styles
 from qtxterm import MainWindow
+from src import ChellyQThreadManager
 from PySide6.QtWidgets import QApplication
 import hjson
 from weakref import ref
@@ -47,6 +48,7 @@ EMULATORS_FILE = os.path.join(ROOT_PATH, "data", "terminals.json")
 
 def main(*args, **kwargs) -> None:
     app = QApplication(sys.argv)
+    app_thread_manager = ChellyQThreadManager(app)
     app.setApplicationName("QUTERM")
 
     window = MainWindow(None, app, EMULATORS_FILE,

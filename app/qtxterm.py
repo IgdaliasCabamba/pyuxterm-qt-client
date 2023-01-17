@@ -173,9 +173,8 @@ class MainWindow(QMainWindow):
                 self.terminals.pop(idx)
                 term.close()
                 term.deleteLater()
-                terminals = self.terminals.values()
-                if len(terminals) > 0:
-                    self._current_terminal_view = terminals[0]
+                if (idx-1) >= 0:
+                    self._current_terminal_view = self.terminals[idx-1]
                 else:
                     self.change_view(terminals=False)
                     self._current_terminal_view = None
