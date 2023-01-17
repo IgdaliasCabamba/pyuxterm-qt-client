@@ -25,8 +25,7 @@ class MainWindow(QMainWindow):
         self.qapp = qapp
         self.PORT = port_creator
         (self.build()
-            .listen_events()
-            .after_startup())
+         .listen_events())
 
     def build(self) -> "MainWindow":
 
@@ -83,15 +82,19 @@ class MainWindow(QMainWindow):
         ))
         self.open_settings_file_button.setObjectName("TermNavItem")
 
+        self.home_screen = PrimaryScreen(self)
+        self.home_screen.setObjectName("HomeScreen")
+
         self.div = MultiSplitter(self)
         self.div.setObjectName("Splitter")
         self.div.set_opaque_resize(True)
+        self.div.setVisible(False)
 
+        self.layout.addWidget(self.home_screen)
         self.layout.addWidget(self.div)
         self.main_widget.setLayout(self.layout)
         self.setCentralWidget(self.main_widget)
         self.setStatusBar(self.status_bar)
-
         self.resize(1000, 600)
 
         qtRectangle = self.frameGeometry()
@@ -110,20 +113,36 @@ class MainWindow(QMainWindow):
         self.open_settings_file_button.clicked.connect(self.open_settings)
         self.qapp.focusChanged.connect(self._app_focus_changed)
         self.qapp.lastWindowClosed.connect(self.kill_app)
+
+        self.home_screen.btn_new_local_terminal.clicked.connect(
+            self.add_terminal)
         return self
 
-    def after_startup(self) -> "MainWindow":
-        self._new_terminal(self.current_terminal_emulator["bin"], None, 0)
-        return self
+    def change_view(self, terminals: bool) -> None:
+        if terminals:
+            if self.home_screen.isVisible():
+                self.home_screen.setVisible(False)
 
-    def split_new_terminal(self, orientation: int) -> None:
+            if not self.div.isVisible():
+                self.div.setVisible(True)
+        else:
+            if self.div.isVisible():
+                self.div.setVisible(False)
+
+            if not self.home_screen.isVisible():
+                self.home_screen.setVisible(True)
+
+    def split_new_terminal(self, orientation: int) -> "MainWindow":
         self._new_terminal(
             self.current_terminal_emulator["bin"], self._current_terminal_view, orientation)
+        return self
 
-    def add_terminal(self) -> None:
+    def add_terminal(self) -> "MainWindow":
         self._new_terminal(self.current_terminal_emulator["bin"], None, 0)
+        return self
 
     def _new_terminal(self, command, widget_ref, orientation) -> None:
+        self.change_view(terminals=True)
         self.terminals[self.index] = ((
             TerminalWidget(self.div, command)
             .spawn(self.PORT())
@@ -158,6 +177,7 @@ class MainWindow(QMainWindow):
                 if len(terminals) > 0:
                     self._current_terminal_view = terminals[0]
                 else:
+                    self.change_view(terminals=False)
                     self._current_terminal_view = None
                 break
 
@@ -182,7 +202,8 @@ class MainWindow(QMainWindow):
 
     def open_settings(self) -> None:
         editor = os.getenv('EDITOR')
-        filename = os.path.join(os.environ["QtxTermRootPath"], "data", "settings.json")
+        filename = os.path.join(
+            os.environ["QtxTermRootPath"], "data", "settings.json")
         if editor:
             subprocess.Popen([editor, filename])
         else:

@@ -1,5 +1,6 @@
-qtenv/
+pyenv/
 tests/
+dev/
 **/bin
 **/build
 **/dist
