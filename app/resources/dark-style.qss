@@ -1,3 +1,7 @@
+QLineEdit {
+    padding: 5px;
+    border-radius: 5px;
+}
 QSizeGrip {
     image: none;
     width: 16px;

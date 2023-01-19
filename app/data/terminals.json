@@ -6,30 +6,43 @@
 			"name":"Bash",
 			"bin":"/bin/bash",
 			"icon":null,
-			"run_on_startup":true,
 			"id":0
 		},
 		{
 			"name":"Python",
 			"bin":"/bin/python3",
 			"icon":null,
-			"run_on_startup":false,
 			"id":1
 		},
 		{
 			"name":"NodeJs",
 			"bin":"/bin/node",
 			"icon":null,
-			"run_on_startup":false,
 			"id":2
 		},
 		{
 			"name":"Kali",
 			"bin":"/bin/bash",
-			"run":["distrobox-enter --root hack\\n"],
+			"sudo":true,
+			"run":["distrobox-enter --root uterm-kali\\n"],
 			"icon":"kali-linux.png",
-			"run_on_startup":false,
 			"id":3
+		},
+		{
+			"name":"Ubuntu",
+			"bin":"/bin/bash",
+			"sudo":true,
+			"run":["distrobox-enter --root uterm-ubuntu\\n"],
+			"icon":"ubuntu.png",
+			"id":4
+		},
+		{
+			"name":"Debian",
+			"bin":"/bin/bash",
+			"sudo":true,
+			"run":["distrobox-enter --root uterm-debian\\n"],
+			"icon":"debian.png",
+			"id":5
 		}
 	]
 }

@@ -1,4 +1,5 @@
 {
+    "user":{"name":"YourName"},
     "app-theme":"dark",
     "xterm-theme":"default"
 }
