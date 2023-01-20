@@ -3,12 +3,14 @@ from PySide6.QtWidgets import *
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 import qtawesome as qta
+import sh
 
 
 class Home(QFrame):
     def __init__(self, parent):
         super().__init__(parent)
         self.build()
+        self.listen_events()
 
     def build(self) -> None:
         self.vbox = QHBoxLayout(self)
@@ -53,6 +55,20 @@ class Home(QFrame):
         self.vbox_panel.addLayout(hbox_panel1)
 
         self.vbox.addWidget(self.start_panel)
+    
+    def save_password(self, password:str):
+        with sh.contrib.sudo(password=password, _with=True):
+            try:
+                sh.echo("uterm")
+                self.password_input.setStyleSheet("border: 2px inset green;")
+            except sh.ErrorReturnCode:
+                self.password_input.setStyleSheet("border: 2px outset red;")
+                
+
+    
+    
+    def listen_events(self):
+        self.password_input.returnPressed.connect(lambda: self.save_password(self.password_input.text()))
 
 
 class PrimaryScreen(QFrame):

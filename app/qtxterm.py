@@ -82,6 +82,13 @@ class MainWindow(QMainWindow):
         ))
         self.open_settings_file_button.setObjectName("TermNavItem")
 
+        self.go_home_screen_button = QPushButton()
+        self.go_home_screen_button.setIcon(QIcon(
+            os.path.join(os.environ["QtxTermRootPath"], "resources", "icons",
+                         "icons8-settings-48.png")
+        ))
+        self.go_home_screen_button.setObjectName("TermNavItem")
+
         self.home_screen = PrimaryScreen(self)
         self.home_screen.setObjectName("HomeScreen")
 
