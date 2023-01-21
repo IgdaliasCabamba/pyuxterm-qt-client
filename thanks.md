@@ -6,3 +6,5 @@
 <a target="_blank" href="https://icons8.com/icon/101665/kali-linux">Kali Linux</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
 <a target="_blank" href="https://icons8.com/icon/63208/ubuntu">Ubuntu</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
 <a target="_blank" href="https://icons8.com/icon/17838/debian">Debian</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+<a target="_blank" href="https://icons8.com/icon/i6fZC6wuprSu/home">Home</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
+<a target="_blank" href="https://icons8.com/icon/cM8GpTJ5H3wF/console">Console</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
