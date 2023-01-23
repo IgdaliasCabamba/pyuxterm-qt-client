@@ -9,13 +9,20 @@ from PySide6.QtWebChannel import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
 
+from enum import Enum
+
 
 class MainWindow(QMainWindow):
+
+    class VIEWS(Enum):
+        HOME = 0
+        TERMINALS = 1
 
     def __init__(self, parent=None, qapp=None, emulators_file=None, port_creator=None):
         super().__init__(parent)
         self.terminals = {}
         self.terminals_json_api = TerminalsJsonApi(emulators_file)
+        self.current_screen = self.VIEWS.HOME
         self.current_terminal_emulator = self.terminals_json_api.current
         self.index = 0
         self.modern_window = None
@@ -82,12 +89,12 @@ class MainWindow(QMainWindow):
         ))
         self.open_settings_file_button.setObjectName("TermNavItem")
 
-        self.go_home_screen_button = QPushButton()
-        self.go_home_screen_button.setIcon(QIcon(
+        self.toggle_screens_button = QPushButton()
+        self.toggle_screens_button.setIcon(QIcon(
             os.path.join(os.environ["QtxTermRootPath"], "resources", "icons",
-                         "icons8-settings-48.png")
+                         "icons8-console-48.png")
         ))
-        self.go_home_screen_button.setObjectName("TermNavItem")
+        self.toggle_screens_button.setObjectName("TermNavItem")
 
         self.home_screen = PrimaryScreen(self)
         self.home_screen.setObjectName("HomeScreen")
@@ -118,6 +125,8 @@ class MainWindow(QMainWindow):
             lambda: self.show_split_new_terminal_menu.showMenu())
         self.remove_current_terminal_button.clicked.connect(self.kill_term)
         self.open_settings_file_button.clicked.connect(self.open_settings)
+        self.toggle_screens_button.clicked.connect(self.toggle_screens)
+
         self.qapp.focusChanged.connect(self._app_focus_changed)
         self.qapp.lastWindowClosed.connect(self.kill_app)
 
@@ -125,20 +134,35 @@ class MainWindow(QMainWindow):
             self.add_terminal)
         return self
 
-    def change_view(self, terminals: bool) -> None:
-        if terminals:
-            if self.home_screen.isVisible():
-                self.home_screen.setVisible(False)
-
-            if not self.div.isVisible():
-                self.div.setVisible(True)
-        else:
+    def change_screen(self, **kwargs) -> None:
+        if kwargs.get("home", False):
             if self.div.isVisible():
                 self.div.setVisible(False)
 
             if not self.home_screen.isVisible():
                 self.home_screen.setVisible(True)
 
+            self.current_screen = self.VIEWS.HOME
+
+            self.toggle_screens_button.setIcon(QIcon(
+                os.path.join(os.environ["QtxTermRootPath"], "resources", "icons",
+                             "icons8-console-48.png")
+            ))
+
+        elif kwargs.get("terminals", False):
+            if self.home_screen.isVisible():
+                self.home_screen.setVisible(False)
+
+            if not self.div.isVisible():
+                self.div.setVisible(True)
+
+            self.current_screen = self.VIEWS.TERMINALS
+
+            self.toggle_screens_button.setIcon(QIcon(
+                os.path.join(os.environ["QtxTermRootPath"], "resources", "icons",
+                             "icons8-home-48.png")
+            ))
+        
     def split_new_terminal(self, orientation: int) -> "MainWindow":
         self._new_terminal(
             self.current_terminal_emulator["bin"], self._current_terminal_view, orientation)
@@ -149,7 +173,7 @@ class MainWindow(QMainWindow):
         return self
 
     def _new_terminal(self, command, widget_ref, orientation) -> None:
-        self.change_view(terminals=True)
+        self.change_screen(terminals=True)
         self.terminals[self.index] = ((
             TerminalWidget(self.div, command)
             .spawn(self.PORT())
@@ -183,7 +207,7 @@ class MainWindow(QMainWindow):
                 if (idx-1) >= 0:
                     self._current_terminal_view = self.terminals[idx-1]
                 else:
-                    self.change_view(terminals=False)
+                    self.change_screen(home=True)
                     self._current_terminal_view = None
                 break
 
@@ -214,3 +238,10 @@ class MainWindow(QMainWindow):
             subprocess.Popen([editor, filename])
         else:
             subprocess.Popen(["xdg-open", filename])
+
+    def toggle_screens(self):
+        if self.current_screen == self.VIEWS.HOME:
+            self.change_screen(terminals = True)
+        
+        elif self.current_screen == self.VIEWS.TERMINALS:
+            self.change_screen(home = True)

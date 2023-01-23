@@ -67,7 +67,7 @@ def main(*args, **kwargs) -> None:
             window.remove_current_terminal_button,
         ],
         extra_buttons_right = [
-            window.go_home_screen_button,
+            window.toggle_screens_button,
             window.open_settings_file_button
         ]
     )
