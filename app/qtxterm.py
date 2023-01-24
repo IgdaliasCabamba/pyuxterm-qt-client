@@ -8,6 +8,7 @@ from PySide6.QtWebEngineCore import *
 from PySide6.QtWebChannel import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
+import hjson
 
 from enum import Enum
 
@@ -17,11 +18,26 @@ class MainWindow(QMainWindow):
     class VIEWS(Enum):
         HOME = 0
         TERMINALS = 1
+    
+    @property
+    def password(self):
+        return self.__password
+    
+    @password.setter
+    def password(self, password:str):
+        self.__password = password
+    
+    def set_password(self, password:str) -> None:
+        self.password = password
 
-    def __init__(self, parent=None, qapp=None, emulators_file=None, port_creator=None):
+    def __init__(self, parent, qapp, emulators_file:str, images_file:str, port_creator:object):
         super().__init__(parent)
-        self.terminals = {}
+        self.__password = None
+        self.terminals = dict()
         self.terminals_json_api = TerminalsJsonApi(emulators_file)
+        self.docker_images = dict()
+        with open(images_file, "r") as fp:
+            self.docker_images = hjson.load(fp)
         self.current_screen = self.VIEWS.HOME
         self.current_terminal_emulator = self.terminals_json_api.current
         self.index = 0
@@ -130,8 +146,10 @@ class MainWindow(QMainWindow):
         self.qapp.focusChanged.connect(self._app_focus_changed)
         self.qapp.lastWindowClosed.connect(self.kill_app)
 
-        self.home_screen.btn_new_terminal.clicked.connect(
+        self.home_screen.home.on_password_changed.connect(self.set_password)
+        self.home_screen.new_terminal_btn.clicked.connect(
             self.add_terminal)
+            
         return self
 
     def change_screen(self, **kwargs) -> None:

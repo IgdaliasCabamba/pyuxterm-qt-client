@@ -44,6 +44,7 @@ with open(style_sheet_path, "r") as fp:
 
 
 EMULATORS_FILE = os.path.join(ROOT_PATH, "data", "terminals.json")
+IMAGES_FILE = os.path.join(ROOT_PATH, "data", "images.json")
 
 
 def main(*args, **kwargs) -> None:
@@ -51,7 +52,7 @@ def main(*args, **kwargs) -> None:
     app_thread_manager = ChellyQThreadManager(app)
     app.setApplicationName("QUTERM")
 
-    window = MainWindow(None, app, EMULATORS_FILE,
+    window = MainWindow(None, app, EMULATORS_FILE, IMAGES_FILE,
                         lambda: random.randint(7000, 65530))
 
     if QTXTERM_SETTINGS["app-theme"] == "light":

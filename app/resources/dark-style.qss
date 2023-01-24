@@ -1,3 +1,6 @@
+QScrollArea, QScrollArea QFrame {
+    background-color: transparent;
+}
 QLineEdit {
     padding: 5px;
     border-radius: 5px;
@@ -86,4 +89,9 @@ QGithubButton:hover {
     background: #222;
     border-radius: 5px;
     border: 1.5px solid #444;
+}
+
+#AppFrameSecondary {
+    background-color: #333;
+    border-radius: 10px
 }
