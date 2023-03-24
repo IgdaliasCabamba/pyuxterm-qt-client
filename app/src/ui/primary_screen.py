@@ -9,87 +9,9 @@ from sarge import capture_stdout
 from ..thread_manager import ChellyQThreadManager
 
 
-class DockerPullWorker(QObject):
-
-    on_pulled = Signal(object)
-
-    def __init__(self, parent):
-        super().__init__()
-        self._parent = parent
-
-    def run(self) -> None:
-        self._parent.on_pull_requested.connect(self.pull_image)
-
-    def pull_image(self, image_path: str, password: str) -> None:
-        try:
-            res = capture_stdout(
-                f"echo '{password}' | sudo -S docker pull {image_path}")
-            self.on_pulled.emit(image_path)
-        except Exception as e:
-            print(e)
-
-
-class ContainerImage(QFrame):
-    on_pull_requested = Signal(str, str)
-
-    def render_icon(self, reply):
-        img = QImage()
-        img.loadFromData(reply.readAll())
-        self.icon_label.setPixmap(QPixmap(img.scaled(QSize(96, 96))))
-
-    def __init__(self, parent, container_key, container_data: dict):
-        super().__init__(parent)
-        self.setObjectName("AppFrameSecondary")
-
-        self.container_data = container_data
-        self.container_key = container_key
-        self.thread_manager = ChellyQThreadManager()
-
-        self.thread = QThread(self)
-        self.thread_manager.append(self.thread)
-        self.pull_worker = DockerPullWorker(self)
-        self.pull_worker.moveToThread(self.thread)
-        self.thread.started.connect(self.pull_worker.run)
-        self.thread.start()
-        self.build()
-
-    def build(self):
-        self.gbox = QGridLayout(self)
-        self.gbox.setContentsMargins(5, 5, 5, 5)
-        self.setLayout(self.gbox)
-
-        self.icon_label = QLabel(self)
-        self.icon_label.setPixmap(qta.icon('msc.terminal-linux', options=[
-            {'scale_factor': 1}], color='white').pixmap(QSize(64, 64)))
-        self.icon_label.setAlignment(Qt.AlignCenter)
-
-        self.title_label = QLabel(self)
-        self.title_label.setText(
-            f"<h3>{self.container_data['name']}</h3> <p>{self.container_data['description']}</p>")
-        self.title_label.setWordWrap(True)
-
-        self.install_btn = QPushButton(self)
-        self.install_btn.setText("Install")
-        self.install_btn.setSizePolicy(QSizePolicy(
-            QSizePolicy.Fixed, QSizePolicy.Fixed))
-        self.install_btn.setIcon(qta.icon('fa5s.download', options=[
-            {'scale_factor': 1}], color='white'))
-        self.install_btn.setObjectName("AppButtonPrimary")
-
-        self.gbox.addWidget(self.icon_label, 0, 0)
-        self.gbox.addWidget(self.title_label, 1, 0)
-        self.gbox.addWidget(self.install_btn, 2, 0)
-
-        self.nam = QNetworkAccessManager()
-        self.nam.finished.connect(self.render_icon)
-        self.nam.get(QNetworkRequest(QUrl(self.container_data['icon'])))
-
-
-class DistroInstall(QFrame):
+class MorePage(QFrame):
     def __init__(self, parent):
         super().__init__(parent)
-        self.images = self.parent().parent().docker_images
-        self._container_widgets = []
         self.build()
 
     def build(self):
@@ -117,11 +39,17 @@ class DistroInstall(QFrame):
 
         self.vbox.addLayout(header_hbox)
 
-        for key, value in self.images.items():
-            container_widget = ContainerImage(self, key, value)
-            self._container_widgets.append(container_widget)
-            self.vbox.addWidget(container_widget, Qt.AlignCenter)
+        self.about_widget = QFrame(self)
+        self.about_widget.setObjectName("AppFrameSecondary")
 
+        vbox = QVBoxLayout(self.about_widget)
+        vbox.setContentsMargins(5, 5, 5, 5)
+        self.about_widget.setLayout(vbox)
+
+        self.label1 = QLabel("")
+        vbox.addWidget(self.label1)
+
+        self.vbox.addWidget(self.about_widget)
         self.scroll_area.setWidget(self.main_widget)
         self.scroll_area.setWidgetResizable(True)
         self.layout.addWidget(self.scroll_area)
@@ -166,8 +94,8 @@ class Home(QFrame):
         self.new_terminal_btn.setObjectName("AppButtonPrimary")
 
         self.view_distros_btn = QPushButton(self)
-        self.view_distros_btn.setText("Distros")
-        self.view_distros_btn.setIcon(qta.icon('fa5s.shopping-bag', options=[
+        self.view_distros_btn.setText("More")
+        self.view_distros_btn.setIcon(qta.icon('mdi6.more', options=[
             {'scale_factor': 1}], color='white'))
         self.view_distros_btn.setObjectName("AppButtonSecondary")
 
@@ -207,7 +135,7 @@ class PrimaryScreen(QFrame):
         self.setLayout(self.box)
 
         self.home = Home(self)
-        self.install = DistroInstall(self)
+        self.install = MorePage(self)
         self.nav_back_btn = self.install.nav_back_btn
         self.new_terminal_btn = self.home.new_terminal_btn
         self.view_distros_btn = self.home.view_distros_btn

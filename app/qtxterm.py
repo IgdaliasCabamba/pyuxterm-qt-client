@@ -30,14 +30,11 @@ class MainWindow(QMainWindow):
     def set_password(self, password:str) -> None:
         self.password = password
 
-    def __init__(self, parent, qapp, emulators_file:str, images_file:str, port_creator:object):
+    def __init__(self, parent, qapp, emulators_file:str, port_creator:object):
         super().__init__(parent)
         self.__password = None
         self.terminals = dict()
         self.terminals_json_api = TerminalsJsonApi(emulators_file)
-        self.docker_images = dict()
-        with open(images_file, "r") as fp:
-            self.docker_images = hjson.load(fp)
         self.current_screen = self.VIEWS.HOME
         self.current_terminal_emulator = self.terminals_json_api.current
         self.index = 0
