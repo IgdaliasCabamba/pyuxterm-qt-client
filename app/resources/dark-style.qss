@@ -53,15 +53,24 @@ QGithubButton:hover {
 #TermButton[min=true], #TermNavItem[min=true] {
     padding: 0 2px;
 }
+
 #AppButtonSecondary,
 #AppButtonPrimary {
     border-radius: 5px;
+}
+
+#AppButtonPrimary-rounded_0,
+#AppButtonSecondary,
+#AppButtonPrimary {
     color: #fff;
     padding: 8px;
 }
+
 #AppButtonSecondary:focus {
     border: 2px solid #ced4da;
 }
+
+#AppButtonPrimary-rounded_0:focus,
 #AppButtonPrimary:focus {
     border: 2px solid #5e9bf7;
 }
@@ -70,8 +79,14 @@ QGithubButton:hover {
     background-color: #6c757d;
 }
 
+#AppButtonPrimary-rounded_0,
 #AppButtonPrimary {
     background-color: #0d6efd;
+}
+
+#AppButtonIcon {
+    background: transparent;
+    border: none;
 }
 
 

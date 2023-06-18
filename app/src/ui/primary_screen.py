@@ -7,9 +7,51 @@ import qtawesome as qta
 import sh
 from sarge import capture_stdout
 from ..thread_manager import ChellyQThreadManager
+import webbrowser
 
 
 class MorePage(QFrame):
+
+    class WidgetModel(QFrame):
+        def __init__(self, parent, icon_name: str = None, legend_text: str = None, open_btn_text: str = None, open_btn_link: str = None):
+            super().__init__(parent)
+            self.icon_name = icon_name
+            self.legend_text = legend_text
+            self.open_btn_text = open_btn_text
+            self.open_btn_link = open_btn_link
+            self.setStyleSheet("WidgetModel { border-radius: 15px }")
+            self.build()
+
+        def build(self):
+            self.hbox = QHBoxLayout(self)
+            self.hbox.setContentsMargins(0, 0, 0, 0)
+            self.setLayout(self.hbox)
+
+            self.icon = QPushButton(self)
+            self.icon.setObjectName("AppButtonIcon")
+            self.icon.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding))
+            self.icon.setIcon(qta.icon(self.icon_name, options=[{'scale_factor': 1}], color='white'))
+            self.icon.setIconSize(QSize(64, 64))
+
+            self.legend_lbl = QLabel(self)
+            self.legend_lbl.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding))
+            self.legend_lbl.setAlignment(Qt.AlignCenter)
+            self.legend_lbl.setWordWrap(True)
+            self.legend_lbl.setText(self.legend_text)
+
+            self.open_btn = QPushButton(self)
+            self.open_btn.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding))
+            self.open_btn.setText(self.open_btn_text)
+            self.open_btn.setObjectName("AppButtonPrimary-rounded_0")
+            self.open_btn.setStyleSheet("border-top-right-radius: 15px; border-bottom-right-radius: 15px;")
+
+            self.hbox.addWidget(self.icon)
+            self.hbox.addWidget(self.legend_lbl)
+            self.hbox.addWidget(self.open_btn)
+
+            self.open_btn.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(self.open_btn_link)))
+
+
     def __init__(self, parent):
         super().__init__(parent)
         self.build()
@@ -39,17 +81,31 @@ class MorePage(QFrame):
 
         self.vbox.addLayout(header_hbox)
 
-        self.about_widget = QFrame(self)
-        self.about_widget.setObjectName("AppFrameSecondary")
+        self.update_widget = MorePage.WidgetModel(
+            self, icon_name="mdi6.update",
+            legend_text=f"Software Update Available: Enhancements, Fixes, and New Features for pyuxterm-qt<br><strong>Current version: 0.0.1</strong>",
+            open_btn_text="Open Link",
+            open_btn_link="https://github.com/IgdaliasCabamba/pyuxterm-qt-client/releases")
+        self.update_widget.setObjectName("AppFrameSecondary")
 
-        vbox = QVBoxLayout(self.about_widget)
-        vbox.setContentsMargins(5, 5, 5, 5)
-        self.about_widget.setLayout(vbox)
+        self.github_widget = MorePage.WidgetModel(
+            self, icon_name="mdi6.github",
+            legend_text="Explore and Collaborate on Our GitHub Repository!",
+            open_btn_text="Open Link",
+            open_btn_link="https://github.com/IgdaliasCabamba/pyuxterm-qt-client")
+        self.github_widget.setObjectName("AppFrameSecondary")
 
-        self.label1 = QLabel("")
-        vbox.addWidget(self.label1)
+        self.distrobox_widget = MorePage.WidgetModel(
+            self, icon_name="mdi6.linux",
+            legend_text="<strong style='background:red; color:white'>DistroBox</strong> Use any Linux distribution inside your terminal.",
+            open_btn_text="Open Link",
+            open_btn_link="https://github.com/89luca89/distrobox")
+        self.distrobox_widget.setObjectName("AppFrameSecondary")
 
-        self.vbox.addWidget(self.about_widget)
+        self.vbox.addWidget(self.update_widget)
+        self.vbox.addWidget(self.github_widget)
+        self.vbox.addWidget(self.distrobox_widget)
+
         self.scroll_area.setWidget(self.main_widget)
         self.scroll_area.setWidgetResizable(True)
         self.layout.addWidget(self.scroll_area)
