@@ -6,7 +6,7 @@ faulthandler.enable()
 
 import qtmodern.windows
 import qtmodern.styles
-from qtxterm import MainWindow
+from src.qtxterm import MainWindow
 from src import ChellyQThreadManager
 from PySide6.QtWidgets import QApplication
 import hjson

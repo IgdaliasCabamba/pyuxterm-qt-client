@@ -1,5 +1,5 @@
 import os
-from src import *
+from . import *
 from qtmd.splitter import MultiSplitter
 from qtmd.qgithubbutton import QGithubButton
 from PySide6.QtWidgets import *
@@ -8,7 +8,7 @@ from PySide6.QtWebEngineCore import *
 from PySide6.QtWebChannel import *
 from PySide6.QtGui import *
 from PySide6.QtCore import *
-import hjson
+import subprocess
 
 from enum import Enum
 
